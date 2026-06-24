@@ -18,7 +18,7 @@ if(age >= 18):
 light = "black"
 
 if(light == "red"):
-    print("stop")
+    print("stop") #indentation means proper spacing
 elif(light == "green"):
     print("go")
 elif(light == "yellow"):
@@ -27,3 +27,28 @@ else:
     print("light is broken")
 
 print("end of code")
+
+#Question
+# conditional statements
+
+marks = int(input("enter student marks :"))
+
+if(marks >= 90):
+    grade ="A"
+elif(marks >= 80 and marks < 90):
+    grade = "B"
+elif(marks >= 70 and marks < 80):
+    grade = "C"
+else:
+    grade = "D"
+print("great of the student ->", grade)
+
+#nesting statement and under ek or statement
+age = 34
+
+if(age >= 18):
+    if(age >= 80):
+        print("cannot dirve")
+    print("can drive")
+else:
+    print("cannot drive")
