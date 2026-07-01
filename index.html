@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Duplicate Payment Prevention System</title>
+    <style>
+        :root {
+            --bg-color: #090a0f;
+            --card-bg: #131520;
+            --text-white: #ffffff;
+            --text-muted: #8a8d9e;
+            --accent-blue: #2563eb;
+            --border-color: #1e202e;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-white);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            box-sizing: border-box;
+        }
+
+        h2, h3 {
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 25px;
+            letter-spacing: 0.5px;
+        }
+
+        h2 {
+            color: #3b82f6;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-white);
+            border-radius: 8px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        #responseMessage {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            display: none;
+            font-size: 0.95rem;
+        }
+
+        .history-container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            box-sizing: border-box;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 14px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            font-size: 0.95rem;
+        }
+
+        .status-success {
+            color: #22c55e;
+            font-weight: 600;
+        }
+
+        .status-failed {
+            color: #ef4444;
+            font-weight: 600;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Process Payment</h2>
+        
+        <form id="paymentForm">
+            <label for="userId">User ID</label>
+            <input type="text" id="userId" required placeholder="Enter User ID">
+
+            <label for="amount">Amount ($)</label>
+            <input type="number" id="amount" required placeholder="Enter Amount">
+
+            <label for="vendorId">Vendor ID</label>
+            <input type="text" id="vendorId" required placeholder="Enter Vendor ID">
+
+            <button type="submit">Submit Payment</button>
+        </form>
+
+        <div id="responseMessage"></div>
+    </div>
+
+    <div class="history-container">
+        <h3>Transaction History</h3>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>User ID</th>
+                        <th>Vendor ID</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="transactionTableBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        async function fetchTransactions() {
+            const tableBody = document.getElementById("transactionTableBody");
+            try {
+                const response = await fetch("https://duplicate-payment-prevention-1.onrender.com/transactions");
+                if (response.ok) {
+                    const data = await response.json();
+                    tableBody.innerHTML = data.map(tx => `
+                        <tr>
+                            <td>${tx.time || 'N/A'}</td>
+                            <td>${tx.user_id}</td>
+                            <td>${tx.vendor_id}</td>
+                            <td>$${tx.amount}</td>
+                            <td><span class="${tx.status === 'success' ? 'status-success' : 'status-failed'}">${tx.status}</span></td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        document.getElementById("paymentForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const msgBox = document.getElementById("responseMessage");
+            
+            const payload = {
+                user_id: document.getElementById("userId").value,
+                amount: parseFloat(document.getElementById("amount").value),
+                vendor_id: document.getElementById("vendorId").value
+            };
+
+            msgBox.style.display = "block";
+            msgBox.style.background = "#1e202e";
+            msgBox.style.color = "white";
+            msgBox.style.border = "1px solid var(--border-color)";
+            msgBox.textContent = "Processing...";
+
+            try {
+                const response = await fetch("https://duplicate-payment-prevention-1.onrender.com/process-payment", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    msgBox.style.background = "rgba(34, 197, 94, 0.1)";
+                    msgBox.style.color = "#22c55e";
+                    msgBox.style.border = "1px solid rgba(34, 197, 94, 0.2)";
+                    msgBox.textContent = result.message || "Payment Successful!";
+                    fetchTransactions();
+                } else {
+                    msgBox.style.background = "rgba(239, 68, 68, 0.1)";
+                    msgBox.style.color = "#ef4444";
+                    msgBox.style.border = "1px solid rgba(239, 68, 68, 0.2)";
+                    msgBox.textContent = result.detail || "Transaction Failed!";
+                }
+            } catch (err) {
+                console.error(err);
+                msgBox.style.background = "rgba(239, 68, 68, 0.2)";
+                msgBox.style.color = "#ef4444";
+                msgBox.style.border = "1px solid rgba(239, 68, 68, 0.3)";
+                msgBox.textContent = "Server Connection Error!";
+            }
+        });
+
+        fetchTransactions();
+    </script>
+</body>
+</html>
