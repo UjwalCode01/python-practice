@@ -26,3 +26,8 @@ name3 = """uk"""
 print(name1)
 print(name2)
 print(name3)
+age3 = 23 
+old = False
+a = None
+print(type(old))
+ 
