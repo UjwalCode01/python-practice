@@ -31,3 +31,4 @@ old = False
 a = None
 print(type(old))
 print(type(age3))
+print(age)
