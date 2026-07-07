@@ -32,3 +32,7 @@ a = None
 print(type(old))
 print(type(age3))
 print(age)
+A = 23 
+B = 23.9 
+C = 24
+print(type(A))
