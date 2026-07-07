@@ -9,10 +9,20 @@ name = "ujwal"#string means a double code
 age = 23 # "="assigement rule
 price = 23.98
 age2 = age
-# name is varible,ujwal in value
+# name is varible,ujwal in value [varibles = value]
+#note varible ke starting main number ya special sybmbol use nhi krna hai 
 print(name)
 print(age)
 print(price)
 print("my name is :",name)
 print("my age is :",age)
 print(age2)
+print(type(name))
+print(type(age))
+print(type(price))
+name1 = "uk"
+name2 = 'uk'
+name3 = """uk"""
+print(name1)
+print(name2)
+print(name3)
